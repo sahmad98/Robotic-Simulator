@@ -17,10 +17,19 @@ screen = pygame.display.set_mode((600, 400))
 pygame.display.set_caption('Self Driving Car Simulator v0.1')
 screen.fill(WHITE)
 road_map = []
+
 f = open('map.txt', 'r')
 for line in f:
     road_map.append([x for x in line.split()])
 #print road_map
+f.close()
+
+heur = []
+f = open('heur.txt','r')
+for line in f:
+    heur.append([int(x) for x in line.split()])
+print heur
+f.close()
 
 def make_grid(screen, step, direction = 'vertical'):
     width = screen.get_width()
@@ -62,7 +71,7 @@ for i in xrange(len(road_map)):
 
 queue = []
 path_len = 0
-queue.append((path_len,0,0))
+queue.append((heur[0][0] + path_len,0,0))
 visited[0][0] = 1
 goal = (7, 11)
 
@@ -77,11 +86,11 @@ while True:
             pygame.quit()
             sys.exit()
     
-    # randx = random.randint(0,xGRID)
-    # randy = random.randint(0,yGRID)
-    # if(visited[randy][randx] == 0):
-    #     pygame.draw.rect(screen, BLACK, (randx*GRID_WIDTH, randy*GRID_HEIGHT, GRID_WIDTH, GRID_HEIGHT))
-    #     road_map[randy][randx] = '1'
+    randx = random.randint(0,xGRID)
+    randy = random.randint(0,yGRID)
+    if(visited[randy][randx] == 0 and (randy, randx) != goal):
+        pygame.draw.rect(screen, BLACK, (randx*GRID_WIDTH, randy*GRID_HEIGHT, GRID_WIDTH, GRID_HEIGHT))
+        road_map[randy][randx] = '1'
     #pygame.time.wait(10)
 
     if(len(queue) != 0 and found == False):
@@ -101,22 +110,22 @@ while True:
                 continue
             if(x+1 < len(road_map) and x+1 >= 0 and y < len(road_map[0]) and y>=0):
                 if(road_map[x+1][y] == '0' and visited[x+1][y] == 0):
-                    queue.append((path_len+1, x+1,y))
+                    queue.append((heur[x+1][y] + path_len+1, x+1,y))
                     visited[x+1][y] = 1
                     next_level += 1
             if(x < len(road_map) and x>= 0 and y+1 < len(road_map[0]) and y+1 >=0):
                 if(road_map[x][y+1] == '0' and visited[x][y+1] == 0):
-                    queue.append((path_len+1, x,y+1))
+                    queue.append((heur[x][y+1] + path_len+1, x,y+1))
                     visited[x][y+1] = 1
                     next_level += 1
             if(x-1 < len(road_map) and x-1 >= 0 and y < len(road_map[0]) and y>=0):
                 if(road_map[x-1][y] == '0' and visited[x-1][y] == 0):
-                    queue.append((path_len+1, x-1,y))
+                    queue.append((heur[x-1][y] + path_len+1, x-1,y))
                     visited[x-1][y] = 1
                     next_level += 1
             if(x < len(road_map) and x >= 0 and y-1 < len(road_map[0]) and y-1 >=0):
                 if(road_map[x][y-1] == '0' and visited[x][y-1] == 0):
-                    queue.append((path_len+1, x,y-1))
+                    queue.append((heur[x][y-1] + path_len+1, x,y-1))
                     visited[x][y-1] = 1
                     next_level += 1
             pygame.draw.rect(screen, GREEN, (y*GRID_WIDTH, x*GRID_HEIGHT, GRID_WIDTH, GRID_HEIGHT))
